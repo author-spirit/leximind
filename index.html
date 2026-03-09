@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="theme-color" content="#0f0e17"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="LexiMind"/>
+  <title>LexiMind – Vocabulary Coach</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0f0e17;
+      --surface: #1a1828;
+      --card: #211f35;
+      --border: #2e2b4a;
+      --accent: #ff6b6b;
+      --gold: #f5c842;
+      --mint: #43e8b0;
+      --lavender: #a78bfa;
+      --text: #ede9fe;
+      --muted: #7c7a9e;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Background orbs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, #ff6b6b22, transparent);
+      top: -80px; right: -60px;
+    }
+    body::after {
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, #a78bfa22, transparent);
+      bottom: 100px; left: -60px;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative; z-index: 10;
+      padding: 20px 24px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15,14,23,0.8);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--lavender));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      background: linear-gradient(90deg, var(--text), var(--lavender));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .history-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 30px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-btn:hover { color: var(--text); border-color: var(--lavender); }
+
+    /* ── Main ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Input box ── */
+    .input-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .input-section:focus-within {
+      border-color: var(--lavender);
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
+    }
+
+    .input-label {
+      padding: 14px 16px 0;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 1.6;
+      padding: 10px 16px;
+      resize: none;
+      min-height: 90px;
+      caret-color: var(--lavender);
+    }
+    textarea::placeholder { color: var(--muted); }
+
+    .input-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px 14px;
+    }
+
+    .char-count {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--accent), #ff8e53);
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+    }
+    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Loading ── */
+    .loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 30px;
+      text-align: center;
+    }
+    .loading.show { display: flex; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--lavender);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+    }
+
+    /* ── Results ── */
+    .results { display: flex; flex-direction: column; gap: 14px; }
+
+    .original-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .original-pill span {
+      display: block;
+      color: var(--text);
+      font-style: italic;
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    .alt-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: slideUp 0.4s ease both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .alt-card:nth-child(2) { animation-delay: 0.05s; }
+    .alt-card:nth-child(3) { animation-delay: 0.10s; }
+    .alt-card:nth-child(4) { animation-delay: 0.15s; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .style-badge {
+      display: flex; align-items: center; gap: 7px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .style-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+
+    .diff-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+    .diff-simple  { background: rgba(67,232,176,0.15); color: var(--mint); }
+    .diff-advanced { background: rgba(167,139,250,0.15); color: var(--lavender); }
+
+    .card-sentence {
+      padding: 14px 16px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+
+    .improvements-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      border-top: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    .improvements-toggle:hover { color: var(--gold); }
+    .toggle-icon { transition: transform 0.25s; font-style: normal; }
+    .toggle-icon.open { transform: rotate(180deg); }
+
+    .improvements-list {
+      display: none;
+      padding: 0 16px 14px;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .improvements-list.open { display: flex; }
+
+    .imp-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .imp-words {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .imp-orig {
+      background: rgba(255,107,107,0.12);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-decoration: line-through;
+      font-size: 12px;
+    }
+    .imp-arrow { color: var(--muted); font-size: 11px; }
+    .imp-new {
+      background: rgba(67,232,176,0.12);
+      color: var(--mint);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .imp-reason {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 1px;
+    }
+
+    .copy-btn {
+      float: right;
+      margin: -8px 16px 10px 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--mint); }
+
+    /* ── History panel ── */
+    .history-panel {
+      position: fixed;
+      inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-end;
+    }
+    .history-panel.open { display: flex; }
+
+    .history-sheet {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-height: 70dvh;
+      display: flex;
+      flex-direction: column;
+      animation: sheetUp 0.3s ease;
+    }
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .history-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 0;
+    }
+    .history-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .history-head h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+    }
+    .close-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .history-list {
+      overflow-y: auto;
+      padding: 12px 16px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .history-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .history-item:hover { border-color: var(--lavender); }
+    .history-item-text {
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-item-time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .no-history {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 30px 0;
+    }
+
+    /* ── Error ── */
+    .error-box {
+      display: none;
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--accent);
+    }
+    .error-box.show { display: block; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 30px 0;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 40px; opacity: 0.4; }
+    .empty-state p { font-size: 14px; max-width: 220px; line-height: 1.6; }
+
+    /* Config modal */
+    .config-modal {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .config-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      width: 100%; max-width: 420px;
+    }
+    .config-box h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .config-box p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .config-input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      padding: 12px 14px;
+      outline: none;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .config-input:focus { border-color: var(--lavender); }
+    .config-save {
+      width: 100%;
+      background: linear-gradient(135deg, var(--lavender), #818cf8);
+      color: white;
+      border: none;
+      padding: 13px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .config-save:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+<!-- Config modal (first-time setup) -->
+<div class="config-modal" id="configModal">
+  <div class="config-box">
+    <h2>⚙️ One-time Setup</h2>
+    <p>Paste your Google Apps Script Web App URL below. This is saved only on your device.</p>
+    <input class="config-input" id="scriptUrl" type="url"
+           placeholder="https://script.google.com/macros/s/.../exec"
+           autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <button class="config-save" onclick="saveConfig()">Save & Continue →</button>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">📖</div>
+    <span class="logo-text">LexiMind</span>
+  </div>
+  <button class="history-btn" onclick="openHistory()">🕓 History</button>
+</header>
+
+<!-- Main -->
+<main>
+  <!-- Input -->
+  <div class="input-section">
+    <div class="input-label">Your sentence</div>
+    <textarea id="inputText" rows="3"
+      placeholder="Type or paste a sentence to enhance…"
+      oninput="updateChar()"></textarea>
+    <div class="input-footer">
+      <span class="char-count" id="charCount">0 / 400</span>
+      <button class="submit-btn" id="submitBtn" onclick="processText()">
+        ✦ Enhance
+      </button>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Crafting alternatives<span class="loading-dots"></span></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="empty-state">
+      <div class="empty-icon">✦</div>
+      <p>Enter a sentence above to discover richer ways to express it</p>
+    </div>
+  </div>
+</main>
+
+<!-- History panel -->
+<div class="history-panel" id="historyPanel" onclick="closeHistoryOutside(event)">
+  <div class="history-sheet">
+    <div class="history-handle"></div>
+    <div class="history-head">
+      <h2>Recent</h2>
+      <button class="close-btn" onclick="closeHistory()">✕</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+const STYLE_META = {
+  Formal:     { icon: '🎩', color: '#f5c842' },
+  Casual:     { icon: '😊', color: '#43e8b0' },
+  Eloquent:   { icon: '✨', color: '#a78bfa' },
+  Concise:    { icon: '⚡', color: '#60a5fa' },
+  Persuasive: { icon: '💬', color: '#fb923c' },
+  Academic:   { icon: '📚', color: '#a78bfa' },
+  Narrative:  { icon: '📖', color: '#f472b6' },
+};
+
+let history = JSON.parse(localStorage.getItem('lm_history') || '[]');
+
+// ── Config ────────────────────────────────────────────────
+function loadConfig() {
+  const url = localStorage.getItem('lm_script_url');
+  if (url) document.getElementById('configModal').style.display = 'none';
+}
+
+function saveConfig() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    alert('Please paste a valid Google Apps Script URL.');
+    return;
+  }
+  localStorage.setItem('lm_script_url', url);
+  document.getElementById('configModal').style.display = 'none';
+}
+
+// ── Input ─────────────────────────────────────────────────
+function updateChar() {
+  const val = document.getElementById('inputText').value;
+  document.getElementById('charCount').textContent = `${val.length} / 400`;
+}
+
+// ── Process ───────────────────────────────────────────────
+async function processText() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) return;
+
+  const scriptUrl = localStorage.getItem('lm_script_url');
+  if (!scriptUrl) {
+    document.getElementById('configModal').style.display = 'flex';
+    return;
+  }
+
+  setLoading(true);
+  hideError();
+
+  try {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.alternatives) throw new Error('Unexpected response format');
+
+    renderResults(text, data.alternatives);
+    saveHistory(text, data.alternatives);
+
+  } catch (err) {
+    showError('⚠️ ' + (err.message || 'Something went wrong. Check your script URL.'));
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── Render ────────────────────────────────────────────────
+function renderResults(original, alternatives) {
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+
+  // Original pill
+  const pill = document.createElement('div');
+  pill.className = 'original-pill';
+  pill.innerHTML = `Original <span>${escHtml(original)}</span>`;
+  container.appendChild(pill);
+
+  alternatives.forEach((alt, i) => {
+    const meta = STYLE_META[alt.style] || { icon: '🔄', color: '#7c7a9e' };
+    const diffClass = alt.difficulty === 'Simple' ? 'diff-simple' : 'diff-advanced';
+
+    const card = document.createElement('div');
+    card.className = 'alt-card';
+    card.style.animationDelay = `${i * 0.07}s`;
+
+    const impHtml = (alt.improvements || []).map(imp => `
+      <div class="imp-row">
+        <div class="imp-words">
+          <span class="imp-orig">${escHtml(imp.original)}</span>
+          <span class="imp-arrow">→</span>
+          <span class="imp-new">${escHtml(imp.replacement)}</span>
+        </div>
+        <div class="imp-reason">${escHtml(imp.reason)}</div>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="style-badge">
+          <div class="style-icon" style="background:${meta.color}22">${meta.icon}</div>
+          <span style="color:${meta.color}">${alt.style}</span>
+        </div>
+        <span class="diff-badge ${diffClass}">${alt.difficulty}</span>
+      </div>
+      <div class="card-sentence">${escHtml(alt.sentence)}</div>
+      <button class="copy-btn" onclick="copyText(this, '${escAttr(alt.sentence)}')">Copy</button>
+      ${impHtml ? `
+        <div class="improvements-toggle" onclick="toggleImprove(this)">
+          <em class="toggle-icon">▼</em>
+          💡 Vocabulary improvements (${alt.improvements.length})
+        </div>
+        <div class="improvements-list">${impHtml}</div>
+      ` : ''}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleImprove(el) {
+  const icon = el.querySelector('.toggle-icon');
+  const list = el.nextElementSibling;
+  icon.classList.toggle('open');
+  list.classList.toggle('open');
+}
+
+async function copyText(btn, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1800);
+  } catch {}
+}
+
+// ── History ───────────────────────────────────────────────
+function saveHistory(text, alternatives) {
+  history.unshift({ text, alternatives, time: Date.now() });
+  if (history.length > 20) history.pop();
+  localStorage.setItem('lm_history', JSON.stringify(history));
+}
+
+function openHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+  if (!history.length) {
+    list.innerHTML = '<div class="no-history">No history yet</div>';
+  } else {
+    history.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'history-item';
+      const t = new Date(item.time);
+      el.innerHTML = `
+        <div class="history-item-text">${escHtml(item.text)}</div>
+        <div class="history-item-time">${t.toLocaleDateString()} ${t.toLocaleTimeString()}</div>
+      `;
+      el.onclick = () => {
+        document.getElementById('inputText').value = item.text;
+        updateChar();
+        renderResults(item.text, item.alternatives);
+        closeHistory();
+      };
+      list.appendChild(el);
+    });
+  }
+  document.getElementById('historyPanel').classList.add('open');
+}
+
+function closeHistory() {
+  document.getElementById('historyPanel').classList.remove('open');
+}
+function closeHistoryOutside(e) {
+  if (e.target === document.getElementById('historyPanel')) closeHistory();
+}
+
+// ── UI helpers ────────────────────────────────────────────
+function setLoading(on) {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('submitBtn').disabled = on;
+  if (on) document.getElementById('results').innerHTML = '';
+}
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('errorBox').classList.remove('show');
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/'/g,"\\'");
+}
+
+// ── Keyboard shortcut ─────────────────────────────────────
+document.getElementById('inputText').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') processText();
+});
+
+// ── Init ──────────────────────────────────────────────────
+loadConfig();
+</script>
+</body>
+</html>
